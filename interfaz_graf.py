@@ -87,7 +87,11 @@ if menu == "⚡ Calculadora":
             )
             # Mostrar la resistividad asociada al material seleccionado
             rho_sel = obtener_resistividad(material)
+<<<<<<< HEAD
             st.caption(f"Resistividad del {material}: **{rho_sel:.2e} Ω·m** a 20 °C")
+=======
+            st.caption(f"Resistividad del {material_sel}: **{rho_sel:.2e} Ω·m** a 20 °C")
+>>>>>>> c48ace6966384c06464db11473a4e2ea60f06742
 
             longitud_str = st.text_input(
                 "4. Longitud de ida - L (Metros):",
@@ -153,5 +157,8 @@ else:
     st.title("📊 Exportación de Reportes en Formato CSV")
     st.subheader("Genere y descargue reportes del historial de cálculos con encabezados estructurados "
         "y unidades físicas explícitas en cada columna")
+<<<<<<< HEAD
 
 """chao"""
+=======
+>>>>>>> c48ace6966384c06464db11473a4e2ea60f06742
