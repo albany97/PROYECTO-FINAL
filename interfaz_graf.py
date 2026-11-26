@@ -137,21 +137,30 @@ if menu == "⚡ Calculadora":
             if boton_calcular:
                 try:
                     # 1. Validación de entradas (funciones puras sin dependencia de widgets)
-                    v_val, rc_val, mat_val, rho_val, l_val, a_val = validar_todas_las_entradas(
-                        tension = tension_str,
+                    rho_val = obtener_resistividad(material)
+                    datos_validados = validar_todas_las_entradas(
+                        voltaje = tension_str,
                         resistencia_carga = rcarga_str,
-                        material = material,
-                        longitud_ida = longitud_str,
-                        seccion_transversal = seccion_str,
+                        longitud = longitud_str,
+                        seccion = seccion_str,
+                        resistividad = rho_val,
                     )
+
+                    v_val = datos_validados["voltaje"]
+                    rc_val = datos_validados["resistencia_carga"]
+                    l_val = datos_validados["longitud"]
+                    a_val = datos_validados["seccion"]
+                    rho_val = datos_validados["resistividad"]
+                    mat_val = material
+
 
                     # 2. Cálculo físico sin redondeos intermedios
                     resultados = calcular_circuito(
-                        tension_v=v_val,
-                        resistencia_carga_ohm=rc_val,
-                        resistividad_ohm_m=rho_val,
-                        longitud_ida_m=l_val,
-                        seccion_mm2=a_val,
+                        voltaje=v_val,
+                        resistencia_carga=rc_val,
+                        material=mat_val,
+                        longitud_inicial=l_val,
+                        mm2=a_val,
                     )
 
                     # 3. Guardar en historial persistente
@@ -169,23 +178,25 @@ if menu == "⚡ Calculadora":
 
                     # Tarjetas métricas
                     m1, m2 = st.columns(2)
-                    m1.metric("Resistencia del Cable (Rc)", f"{resultados['resistencia_cable_ohm']} Ω")
-                    m2.metric("Resistencia Total (Rt)", f"{resultados['resistencia_total_ohm']} Ω")
+                    m1.metric("Resistencia del Cable (Rc)", f"{resultados['Rc']} Ω")
+                    m2.metric("Resistencia Total (Rt)", f"{resultados['Rt']} Ω")
 
                     m3, m4 = st.columns(2)
-                    m3.metric("Corriente del Circuito (I)", f"{resultados['corriente_A']} A")
-                    m4.metric("Caída de Tensión (Vc)", f"{resultados['caida_tension_cable_V']} V")
+                    m3.metric("Corriente del Circuito (I)", f"{resultados['I']} A")
+                    m4.metric("Caída de Tensión (Vc)", f"{resultados['Vc']} V")
 
-                    st.metric("Potencia Disipada en Cable (Pc)", f"{resultados['potencia_disipada_cable_W']} W")
+                    st.metric("Potencia Disipada en Cable (Pc)", f"{resultados['Pc']} W")
 
                     # Explicación resumida de cada magnitud
+                    longitud_total_m = 2 * l_val
+                    seccion_m2 = a_val * 1e-6
                     with st.expander("ℹ️ Detalle y significado de las magnitudes calculadas", expanded=True):
                         st.markdown(
                             f"""
-                            - **Longitud Total del Conductor ($L_{{total}}$):** {resultados['longitud_total_m']:.2f} m (ida {l_val:.2f} m + retorno {l_val:.2f} m).
-                            - **Sección en metros cuadrados ($A$):** {resultados['seccion_m2']:.2e} $\\text{{m}}^2$.
-                            - **Resistencia del Cable ($R_c$):** Oposición eléctrica de los {resultados['longitud_total_m']:.2f} m de cable de {mat_val}.
-                            - **Resistencia Total ($R_t$):** Suma en serie ($R_{{carga}} + R_c = {rc_val} + {resultados['resistencia_cable_ohm']:.4f}\\,\\Omega$).
+                            - **Longitud Total del Conductor ($L_{{total}}$):** {longitud_total_m:.2f} m (ida {l_val:.2f} m + retorno {l_val:.2f} m).
+                            - **Sección en metros cuadrados ($A$):** {seccion_m2:.2e} $\\text{{m}}^2$.
+                            - **Resistencia del Cable ($R_c$):** Oposición eléctrica de los {longitud_total_m:.2f} m de cable de {mat_val}.
+                            - **Resistencia Total ($R_t$):** Suma en serie ($R_{{carga}} + R_c = {rc_val} + {resultados['Rc']:.4f}\\,\\Omega$).
                             - **Corriente ($I$):** Intensidad según Ley de Ohm ($I = V / R_t$).
                             - **Caída de Tensión ($V_c$):** Voltaje absorbido por el cable ($I \\times R_c$).
                             - **Potencia Disipada ($P_c$):** Energía disipada como calor en el cable por efecto Joule ($I^2 \\times R_c$).
@@ -262,11 +273,11 @@ elif menu == "📜 Historial de Cálculos":
                     "Material": ent.get("material"),
                     "Longitud (m)": ent.get("longitud_ida_m"),
                     "Sección (mm²)": ent.get("seccion_mm2"),
-                    "Rc Cable (Ω)": round(res.get("resistencia_cable_ohm", 0), 4),
-                    "Rt Total (Ω)": round(res.get("resistencia_total_ohm", 0), 4),
-                    "Corriente (A)": round(res.get("corriente_A", 0), 4),
-                    "Caída Vc (V)": round(res.get("caida_tension_cable_V", 0), 4),
-                    "Potencia Pc (W)": round(res.get("potencia_disipada_cable_W", 0), 4),
+                    "Rc Cable (Ω)": round(res.get("Rc", 0), 4),
+                    "Rt Total (Ω)": round(res.get("Rt", 0), 4),
+                    "Corriente (A)": round(res.get("I", 0), 4),
+                    "Caída Vc (V)": round(res.get("Vc", 0), 4),
+                    "Potencia Pc (W)": round(res.get("Pc", 0), 4),
                 })
             st.dataframe(filas_tabla, use_container_width=True)
         else:

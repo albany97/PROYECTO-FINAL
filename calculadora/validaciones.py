@@ -87,20 +87,27 @@ def validar_seccion_transversal(seccion):
 
 
 # Revisa todos los datos juntos antes de hacer cualquier cálculo en el circuito
-def validar_todas_las_entradas(voltaje, longitud, seccion, resistividad):
-    # Validamos uno por uno; si alguno está mal, la función lanza ValueError y frena todo
+def validar_todas_las_entradas(
+    voltaje,
+    resistencia_carga,
+    longitud,
+    seccion,
+    resistividad,
+):
     voltaje = validar_numero_positivo(voltaje, "Voltaje (V)")
+    resistencia_carga = validar_numero_positivo(resistencia_carga, "Resistencia de carga (R_carga)")
     longitud = validar_numero_positivo(longitud, "Longitud (L)")
     seccion = validar_seccion_transversal(seccion)
     resistividad = validar_numero_positivo(resistividad, "Resistividad (p)")
 
-    # Si los 4 estan bien, los devolvemos ya convertidos decimal
     return {
         "voltaje": voltaje,
+        "resistencia_carga": resistencia_carga,
         "longitud": longitud,
         "seccion": seccion,
-        "resistividad": resistividad
+        "resistividad": resistividad,
     }
+
 
 
 
