@@ -150,7 +150,7 @@ else:
     st.title("📊 Exportación de Reportes en Formato CSV")
     st.subheader("Genere y descargue reportes del historial de cálculos con encabezados estructurados "
         "y unidades físicas explícitas en cada columna")
-    
+
 
 import streamlit as st
 import json
@@ -303,5 +303,4 @@ else:
     st.title("📊 Exportación de Reportes en Formato CSV")
     st.subheader("Genere y descargue reportes del historial de cálculos con encabezados estructurados "
         "y unidades físicas explícitas en cada columna")
-
 
