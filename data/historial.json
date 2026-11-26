@@ -169,5 +169,119 @@
       "Vc": 0.0801,
       "Pc": 0.0955
     }
+  },
+  {
+    "id": "0010",
+    "fecha_hora": "2026-11-26 09:46:44",
+    "entradas": {
+      "tension_V": 12.0,
+      "resistencia_carga_ohm": 10.0,
+      "material": "Cobre",
+      "resistividad_ohm_m": 1.68e-08,
+      "longitud_ida_m": 5.0,
+      "seccion_mm2": 2.5
+    },
+    "resultados": {
+      "Rc": 0.0672,
+      "Rt": 10.0672,
+      "I": 1.192,
+      "Vc": 0.0801,
+      "Pc": 0.0955
+    }
+  },
+  {
+    "id": "0011",
+    "fecha_hora": "2026-11-26 09:49:12",
+    "entradas": {
+      "tension_V": 17.0,
+      "resistencia_carga_ohm": 6.0,
+      "material": "Oro",
+      "resistividad_ohm_m": 2.21e-08,
+      "longitud_ida_m": 20.0,
+      "seccion_mm2": 6.5
+    },
+    "resultados": {
+      "Rc": 0.136,
+      "Rt": 6.136,
+      "I": 2.7705,
+      "Vc": 0.3768,
+      "Pc": 1.0439
+    }
+  },
+  {
+    "id": "0012",
+    "fecha_hora": "2026-11-26 09:59:29",
+    "entradas": {
+      "tension_V": 12.0,
+      "resistencia_carga_ohm": 10.0,
+      "material": "Cobre",
+      "resistividad_ohm_m": 1.68e-08,
+      "longitud_ida_m": 5.0,
+      "seccion_mm2": 2.5
+    },
+    "resultados": {
+      "Rc": 0.0672,
+      "Rt": 10.0672,
+      "I": 1.192,
+      "Vc": 0.0801,
+      "Pc": 0.0955
+    }
+  },
+  {
+    "id": "0013",
+    "fecha_hora": "2026-11-26 10:01:25",
+    "entradas": {
+      "tension_V": 12.0,
+      "resistencia_carga_ohm": 10.0,
+      "material": "Cobre",
+      "resistividad_ohm_m": 1.68e-08,
+      "longitud_ida_m": 5.0,
+      "seccion_mm2": 2.5
+    },
+    "resultados": {
+      "Rc": 0.0672,
+      "Rt": 10.0672,
+      "I": 1.192,
+      "Vc": 0.0801,
+      "Pc": 0.0955
+    }
+  },
+  {
+    "id": "0014",
+    "fecha_hora": "2026-11-26 10:07:55",
+    "entradas": {
+      "tension_V": 12.0,
+      "resistencia_carga_ohm": 10.0,
+      "material": "Cobre",
+      "resistividad_ohm_m": 1.68e-08,
+      "longitud_ida_m": 5.0,
+      "seccion_mm2": 2.5
+    },
+    "resultados": {
+      "Rc": 0.0672,
+      "Rt": 10.0672,
+      "I": 1.192,
+      "Vc": 0.0801,
+      "Pc": 0.0955
+    }
+  },
+  {
+    "id": "0015",
+    "fecha_hora": "2026-11-26 10:11:42",
+    "entradas": {
+      "tension_V": 12.0,
+      "resistencia_carga_ohm": 10.0,
+      "material": "Cobre",
+      "resistividad_ohm_m": 1.68e-08,
+      "longitud_ida_m": 5.0,
+      "seccion_mm2": 2.5
+    },
+    "resultados": {
+      "Rc": 0.0672,
+      "Rt": 10.0672,
+      "I": 1.192,
+      "Vc": 0.0801,
+      "Pc": 0.0955
+    }
   }
 ]
