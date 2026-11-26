@@ -2,6 +2,7 @@
 import streamlit as st
 import json
 from datetime import datetime
+from logs.logs import (registrar_error, registrar_info, registrar_warning)
 
 from calculadora.materiales import (obtener_lista_materiales, obtener_resistividad)
 
@@ -16,6 +17,8 @@ from utilidades.generadores import (generar_registros_historial, generar_lineas_
 
 from json_csv_registro.reportes_csv import (generar_csv_en_memoria, exportar_reporte_a_disco)
 
+from pathlib import Path
+
 #Config de la pagina
 st.set_page_config(
     page_title = "Calculadora de corriente eléctrica y resistencia",
@@ -23,6 +26,10 @@ st.set_page_config(
     layout = "wide",
     initial_sidebar_state = "expanded"
 )
+
+if "app_iniciada" not in st.session_state:
+    registrar_info("app.py", "Aplicación Streamlit iniciada")
+    st.session_state["app_iniciada"] = True
 
 
 #Barra lateral
@@ -174,6 +181,11 @@ if menu == "⚡ Calculadora":
                     }
                     registro_guardado = guardar_calculo(entradas_dict, resultados)
 
+                    registrar_info(
+                        "Calculadora.calcular",
+                        f"Cálculo guardado ID={registro_guardado['id']} | V={v_val}V, Rcarga={rc_val}Ω, mat={mat_val}, L={l_val}m, A={a_val}mm²",
+                    )
+
                     st.success(f"✅ Cálculo exitoso | Registrado con ID: `{registro_guardado['id']}`")
 
                     # Tarjetas métricas
@@ -204,8 +216,9 @@ if menu == "⚡ Calculadora":
                         )
 
                 except Exception as error_inesperado:
-                    #logger.error(f"Error inesperado en cálculo: {error_inesperado}")
-                    st.error(f"⚠️ Ocurrió un error inesperado al calcular: {error_inesperado}")
+                    #logger.error(f"Error inesperado : {error_inesperado}")
+                    registrar_error("Calculadora.calcular", f"Error inesperado: {error_inesperado}")
+                    st.error(f"⚠️ Ocurrió un error inesperado: {error_inesperado}")
             else:
                 st.info("Presione **'⚡ Calcular Circuito'** para ver las métricas y el desglose de resultados.")
 
@@ -287,6 +300,17 @@ elif menu == "📜 Historial de Cálculos":
 #Don´t know bout this one
 elif menu == "📋 Logs Técnicos":
     st.title("📋 Registros Técnicos de la Aplicación")
+    ruta_log = Path("logs/app.log")
+
+    if st.button("🔄 Actualizar Logs"):
+        st.rerun()
+
+    if ruta_log.exists():
+        contenido_log = ruta_log.read_text(encoding="utf-8")
+        st.code(contenido_log if contenido_log.strip() else "El archivo de log está vacío.", language="text")
+    else:
+        st.info("Aún no se ha generado el archivo `logs/app.log`.")
+
 
 
 #Fundamentos -> Esta facilito
@@ -340,8 +364,10 @@ else:
                 if st.button("💾 Guardar Copia en Carpeta 'reportes/'", use_container_width=True):
                     ruta_guardada = exportar_reporte_a_disco(registros_a_exportar)
                     if ruta_guardada:
+                        registrar_info("ReportesCSV.exportar", f"Reporte guardado en {ruta_guardada}")
                         st.success(f"Reporte archivado en: `{ruta_guardada}`")
                     else:
+                        registrar_error("ReportesCSV.exportar", "No se pudo guardar el reporte CSV en disco")
                         st.error("No se pudo guardar el archivo en disco.")
 
             with st.expander("👁️ Vista Previa del Archivo CSV (Primeros 5 registros)"):
