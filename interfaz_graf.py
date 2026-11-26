@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from logs.logs import (registrar_error, registrar_info, registrar_warning)
 
+
 from calculadora.materiales import (obtener_lista_materiales, obtener_resistividad)
 
 from json_csv_registro.historial import (cargar_historial, guardar_calculo, limpiar_historial)
@@ -348,10 +349,10 @@ elif menu == "💡 Fundamentos / Ayuda":
 
     with tab2:
         st.subheader("Catálogo de Materiales y Resistividades ($\rho$) a 20 °C")
-        materiales = obtener_materiales()
+        materiales = obtener_lista_materiales()
         filas_mat = [
-            {"Material": nombre, "Resistividad ρ (Ω·m)": f"{valor:.2e}", "Valor Exacto": valor}
-            for nombre, valor in materiales.items()
+            {"Material": nombre, "Resistividad ρ (Ω·m)": f"{obtener_resistividad(nombre)}", "Valor Exacto": obtener_resistividad(nombre)}
+            for nombre in materiales
         ]
         st.table(filas_mat)
 
