@@ -28,7 +28,7 @@ st.set_page_config(
 )
 
 if "app_iniciada" not in st.session_state:
-    registrar_info("app.py", "Aplicación Streamlit iniciada")
+    registrar_info("interfaz_graf.py", "Aplicación Streamlit iniciada")
     st.session_state["app_iniciada"] = True
 
 
@@ -65,6 +65,15 @@ if menu == "⚡ Calculadora":
     for clave, valor_def in defaults.items():
         if clave not in st.session_state:
             st.session_state[clave] = valor_def
+
+
+    def limpiar_formulario():
+        st.session_state["input_tension"] = "12.0"
+        st.session_state["input_rcarga"] = "10.0"
+        st.session_state["input_material"] = "Cobre"
+        st.session_state["input_longitud"] = "5.0"
+        st.session_state["input_seccion"] = "2.5 mm²"
+        registrar_info("Calculadora.limpiar", "Formulario restablecido a valores por defecto")
 
     
     with st.container():
@@ -126,16 +135,11 @@ if menu == "⚡ Calculadora":
             with col_btn1:
                 boton_calcular = st.button("⚡ Calcular Circuito", type = "primary", use_container_width = True)
             with col_btn2:
-                boton_limpiar = st.button("🧹 Limpiar Formulario", use_container_width = True)
-
-            if boton_limpiar:
-
-                st.session_state["input_tension"] = "12.0"
-                st.session_state["input_rcarga"] = "10.0"
-                st.session_state["input_material"] = "Cobre"
-                st.session_state["input_longitud"] = "5.0"
-                st.session_state["input_seccion"] = "2.5 mm²"
-                st.rerun()
+                st.button(
+                    "🧹 Limpiar Formulario",
+                    use_container_width=True,
+                    on_click=limpiar_formulario,
+                )    
 
 
         with colum_resp:

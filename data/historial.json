@@ -1,1 +1,40 @@
-[]
+[
+  {
+    "id": "0001",
+    "fecha_hora": "2026-11-26 07:56:50",
+    "entradas": {
+      "tension_V": 12.0,
+      "resistencia_carga_ohm": 10.0,
+      "material": "Cobre",
+      "resistividad_ohm_m": 1.68e-08,
+      "longitud_ida_m": 5.0,
+      "seccion_mm2": 2.5
+    },
+    "resultados": {
+      "Rc": 0.0672,
+      "Rt": 10.0672,
+      "I": 1.192,
+      "Vc": 0.0801,
+      "Pc": 0.0955
+    }
+  },
+  {
+    "id": "0002",
+    "fecha_hora": "2026-11-26 08:23:01",
+    "entradas": {
+      "tension_V": 12.0,
+      "resistencia_carga_ohm": 10.0,
+      "material": "Cobre",
+      "resistividad_ohm_m": 1.68e-08,
+      "longitud_ida_m": 5.0,
+      "seccion_mm2": 2.5
+    },
+    "resultados": {
+      "Rc": 0.0672,
+      "Rt": 10.0672,
+      "I": 1.192,
+      "Vc": 0.0801,
+      "Pc": 0.0955
+    }
+  }
+]
