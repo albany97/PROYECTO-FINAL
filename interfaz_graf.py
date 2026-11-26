@@ -315,11 +315,67 @@ elif menu == "📋 Logs Técnicos":
 
 #Fundamentos -> Esta facilito
 elif menu == "💡 Fundamentos / Ayuda":
-    st.title("💡 Fundamentos Físicos, Matemáticos y Alcance del Simulador")
+    st.header("💡 Fundamentos Físicos, Matemáticos y Alcance del Simulador")
+
     tab1, tab2, tab3 = st.tabs(["📐 Modelo Matemático", "🔬 Resistividades a 20 °C", "🎯 Caso de Referencia y Supuestos"])
 
-    #with tab1: -> Asi para ir de panel en panel solo poniendo info, este no es muy interactivo
+    with tab1:
+        st.subheader("Secuencia Obligatoria de Cálculo (Circuito DC en Serie)")
+        st.markdown(
+            r"""
+            El circuito modela una fuente de tensión continua, un conductor de ida, una carga resistiva y el conductor de retorno.
 
+            1. **Conversión de sección transversal:**
+               $$A(\text{m}^2) = A(\text{mm}^2) \times 10^{-6}$$
+            2. **Longitud total del conductor (ida y vuelta):**
+               $$L_{\text{total}} = 2 \times L$$
+            3. **Resistencia eléctrica del cable conductor:**
+               $$R_c = \rho \times \frac{L_{\text{total}}}{A(\text{m}^2)}$$
+            4. **Resistencia equivalente total del circuito en serie:**
+               $$R_t = R_{\text{carga}} + R_c$$
+            5. **Corriente eléctrica circulante (Ley de Ohm):**
+               $$I = \frac{V}{R_t}$$
+            6. **Caída de tensión en el conductor:**
+               $$V_c = I \times R_c$$
+            7. **Potencia disipada por efecto Joule en el conductor:**
+               $$P_c = I^2 \times R_c$$
+            """
+        )
+
+    with tab2:
+        st.subheader("Catálogo de Materiales y Resistividades ($\rho$) a 20 °C")
+        materiales = obtener_materiales()
+        filas_mat = [
+            {"Material": nombre, "Resistividad ρ (Ω·m)": f"{valor:.2e}", "Valor Exacto": valor}
+            for nombre, valor in materiales.items()
+        ]
+        st.table(filas_mat)
+
+    with tab3:
+        st.subheader("Caso de Comprobación y Calibración Obligatorio")
+        st.markdown(
+            """
+            Para verificar el cálculo correcto, utilice los siguientes valores:
+            - **Tensión ($V$):** $12.0\\,\\text{V}$
+            - **Resistencia de Carga ($R_{\\text{carga}}$):** $10.0\\,\\Omega$
+            - **Material:** Cobre ($\\\\rho = 1.68 \\times 10^{-8}\\,\\Omega\\cdot\\text{m}$)
+            - **Longitud de ida ($L$):** $5.0\\,\\text{m}$
+            - **Sección transversal ($A$):** $2.5\\,\\text{mm}^2$
+
+            **Resultados esperados:**
+            - $R_c \\approx 0.0672\\,\\Omega$
+            - $R_t \\approx 10.0672\\,\\Omega$
+            - $I \\approx 1.1920\\,\\text{A}$
+            - $V_c \\approx 0.0801\\,\\text{V}$
+            - $P_c \\approx 0.0955\\,\\text{W}$
+
+            ---
+            ### ⚠️ Supuestos y Limitaciones Didácticas
+            1. **Temperatura constante:** El cálculo asume $20\\,^\\circ\\text{C}$ invariable. No considera coeficiente térmico de resistividad $(\\alpha)$.
+            2. **Condiciones ideales:** No se modelan inductancias, capacitancias parásitas, corrosión ni resistencias de contacto en bornes.
+            3. **No es dimensionador de ampacidad:** Este software no verifica si el cable soporta térmicamente la corriente calculada conforme a normativas técnicas (ej. NEC / IEC).
+            """
+        )
 
 #Reportes CSV, se dercarga a excel -> De la mano cn json? dont know
 else:
