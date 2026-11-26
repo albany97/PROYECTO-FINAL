@@ -1,6 +1,7 @@
 # De la carpeta calcuuladora importams el modulo materiales para los datos
 import calculadora.materiales
 import logs.logs
+from utilidades.decoradores import auditar_operacion
 
 def convertir_area_mm_m(mm2):
     # Formula : A(m**2) = A(mm**2) * 10e-6
@@ -14,7 +15,7 @@ def calcular_longitud_total(longitud_inicial):
     L_total = 2 * longitud_inicial
     return L_total
 
-
+@auditar_operacion("Cálculo completo del circuito DC")
 def calcular_circuito(voltaje, resistencia_carga, material, longitud_inicial, mm2, id_calculo="0001"):
 
     # Obtenemos la resistividad en ohm por metro desde el módulo materiales
@@ -44,7 +45,7 @@ def calcular_circuito(voltaje, resistencia_carga, material, longitud_inicial, mm
     # Guardamos en el log que el calculo salió bien
     logs.logs.registrar_info(
         "calculadora.calculos",
-        f"cálculo completado | id={id_calculo}"
+        f"cálculo completado "
     )
 
     # Devolvemos todo redondeado a 4 decimales 
