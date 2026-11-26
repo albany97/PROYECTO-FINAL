@@ -6,14 +6,6 @@ import math
 import logs.logs
 
 
-# Acepta cosas como: 2.5, 2,5, 2.5 mm2 o 2,5 mm**2 (con o sin espacios)
-# \s* permite espacios en blanco o no antes de escribir
-# ? al final dice que puede aparecer tanto como no
-# \d+ permite varios numeros por eso esta antes y despues de .,
-# (?:...) agrupa las partes internas sin crear otro grupo aparte, quita espacios
-# \u00b2 es el codigo para el simbolo de elevado al cuadrado y el 2 adelante es indicador de que ese o lo otro sirven
-
-
 patron_seccion = r"^\s*([+-]?\d+(?:[.,]\d+)?)(?:\s*mm[2\u00b2])?\s*$"
 
 def validar_numero_positivo(valor, variable):

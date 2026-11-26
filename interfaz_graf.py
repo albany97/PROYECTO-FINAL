@@ -1,10 +1,20 @@
 
 import streamlit as st
 import json
+from datetime import datetime
 
 from calculadora.materiales import (obtener_lista_materiales, obtener_resistividad)
 
 from json_csv_registro.historial import (cargar_historial, guardar_calculo, limpiar_historial)
+
+from calculadora.validaciones import (validar_todas_las_entradas)
+
+from calculadora.calculos import (calcular_circuito)
+
+from utilidades.generadores import (generar_registros_historial, generar_lineas_log)
+
+
+from json_csv_registro.reportes_csv import (generar_csv_en_memoria, exportar_reporte_a_disco)
 
 #Config de la pagina
 st.set_page_config(
@@ -87,11 +97,8 @@ if menu == "⚡ Calculadora":
             )
             # Mostrar la resistividad asociada al material seleccionado
             rho_sel = obtener_resistividad(material)
-<<<<<<< HEAD
+
             st.caption(f"Resistividad del {material}: **{rho_sel:.2e} Ω·m** a 20 °C")
-=======
-            st.caption(f"Resistividad del {material_sel}: **{rho_sel:.2e} Ω·m** a 20 °C")
->>>>>>> c48ace6966384c06464db11473a4e2ea60f06742
 
             longitud_str = st.text_input(
                 "4. Longitud de ida - L (Metros):",
@@ -126,6 +133,71 @@ if menu == "⚡ Calculadora":
 
         with colum_resp:
             st.subheader("📊 Resultados del Circuito")
+            
+            if boton_calcular:
+                try:
+                    # 1. Validación de entradas (funciones puras sin dependencia de widgets)
+                    v_val, rc_val, mat_val, rho_val, l_val, a_val = validar_todas_las_entradas(
+                        tension = tension_str,
+                        resistencia_carga = rcarga_str,
+                        material = material,
+                        longitud_ida = longitud_str,
+                        seccion_transversal = seccion_str,
+                    )
+
+                    # 2. Cálculo físico sin redondeos intermedios
+                    resultados = calcular_circuito(
+                        tension_v=v_val,
+                        resistencia_carga_ohm=rc_val,
+                        resistividad_ohm_m=rho_val,
+                        longitud_ida_m=l_val,
+                        seccion_mm2=a_val,
+                    )
+
+                    # 3. Guardar en historial persistente
+                    entradas_dict = {
+                        "tension_V": v_val,
+                        "resistencia_carga_ohm": rc_val,
+                        "material": mat_val,
+                        "resistividad_ohm_m": rho_val,
+                        "longitud_ida_m": l_val,
+                        "seccion_mm2": a_val,
+                    }
+                    registro_guardado = guardar_calculo(entradas_dict, resultados)
+
+                    st.success(f"✅ Cálculo exitoso | Registrado con ID: `{registro_guardado['id']}`")
+
+                    # Tarjetas métricas
+                    m1, m2 = st.columns(2)
+                    m1.metric("Resistencia del Cable (Rc)", f"{resultados['resistencia_cable_ohm']} Ω")
+                    m2.metric("Resistencia Total (Rt)", f"{resultados['resistencia_total_ohm']} Ω")
+
+                    m3, m4 = st.columns(2)
+                    m3.metric("Corriente del Circuito (I)", f"{resultados['corriente_A']} A")
+                    m4.metric("Caída de Tensión (Vc)", f"{resultados['caida_tension_cable_V']} V")
+
+                    st.metric("Potencia Disipada en Cable (Pc)", f"{resultados['potencia_disipada_cable_W']} W")
+
+                    # Explicación resumida de cada magnitud
+                    with st.expander("ℹ️ Detalle y significado de las magnitudes calculadas", expanded=True):
+                        st.markdown(
+                            f"""
+                            - **Longitud Total del Conductor ($L_{{total}}$):** {resultados['longitud_total_m']:.2f} m (ida {l_val:.2f} m + retorno {l_val:.2f} m).
+                            - **Sección en metros cuadrados ($A$):** {resultados['seccion_m2']:.2e} $\\text{{m}}^2$.
+                            - **Resistencia del Cable ($R_c$):** Oposición eléctrica de los {resultados['longitud_total_m']:.2f} m de cable de {mat_val}.
+                            - **Resistencia Total ($R_t$):** Suma en serie ($R_{{carga}} + R_c = {rc_val} + {resultados['resistencia_cable_ohm']:.4f}\\,\\Omega$).
+                            - **Corriente ($I$):** Intensidad según Ley de Ohm ($I = V / R_t$).
+                            - **Caída de Tensión ($V_c$):** Voltaje absorbido por el cable ($I \\times R_c$).
+                            - **Potencia Disipada ($P_c$):** Energía disipada como calor en el cable por efecto Joule ($I^2 \\times R_c$).
+                            """
+                        )
+
+                except Exception as error_inesperado:
+                    #logger.error(f"Error inesperado en cálculo: {error_inesperado}")
+                    st.error(f"⚠️ Ocurrió un error inesperado al calcular: {error_inesperado}")
+            else:
+                st.info("Presione **'⚡ Calcular Circuito'** para ver las métricas y el desglose de resultados.")
+
 
 
 
@@ -137,6 +209,68 @@ if menu == "⚡ Calculadora":
 #Conexion cn CSV -> Creo q el csv es el descargable de lo que json guarda, CREO  
 elif menu == "📜 Historial de Cálculos":
     st.title("📜 Historial de cálculos realizados")
+
+    datos_historial = cargar_historial()
+
+    if not datos_historial:
+        st.info("El historial de cálculos se encuentra actualmente vacío.")
+    else:
+        # Filtros usando generadores con yield
+        st.subheader("🔍 Filtros de Consulta")
+        fcol1, fcol2, fcol3 = st.columns([1, 1, 1])
+
+        with fcol1:
+            materiales_filtro = ["Todos"] + obtener_lista_materiales()
+            filtro_mat = st.selectbox("Filtrar por Material:", options=materiales_filtro)
+
+        with fcol2:
+            filtro_fecha = st.text_input(
+                "Filtrar por Fecha (YYYY-MM-DD):",
+                placeholder = "ej. 2026-11-21",
+                help = "Búsqueda por prefijo de fecha."
+            )
+
+        with fcol3:
+            st.write("")
+            st.write("")
+            if st.button("🗑️ Vaciar Historial Completo", type="secondary"):
+                if limpiar_historial():
+                    st.success("Historial eliminado correctamente.")
+                    st.rerun()
+
+        # Uso explícito de la función generadora (utilidades/generadores.py)
+        generador = generar_registros_historial(
+            registros = datos_historial,
+            filtro_material = filtro_mat if filtro_mat != "Todos" else None,
+            filtro_fecha = filtro_fecha.strip() if filtro_fecha.strip() else None,
+        )
+
+        registros_filtrados = list(generador)
+
+        st.caption(f"Mostrando **{len(registros_filtrados)}** de **{len(datos_historial)}** registros guardados.")
+
+        if registros_filtrados:
+            filas_tabla = []
+            for r in registros_filtrados:
+                ent = r.get("entradas", {})
+                res = r.get("resultados", {})
+                filas_tabla.append({
+                    "ID": r.get("id"),
+                    "Fecha y Hora": r.get("fecha_hora"),
+                    "Tensión (V)": ent.get("tension_V"),
+                    "R Carga (Ω)": ent.get("resistencia_carga_ohm"),
+                    "Material": ent.get("material"),
+                    "Longitud (m)": ent.get("longitud_ida_m"),
+                    "Sección (mm²)": ent.get("seccion_mm2"),
+                    "Rc Cable (Ω)": round(res.get("resistencia_cable_ohm", 0), 4),
+                    "Rt Total (Ω)": round(res.get("resistencia_total_ohm", 0), 4),
+                    "Corriente (A)": round(res.get("corriente_A", 0), 4),
+                    "Caída Vc (V)": round(res.get("caida_tension_cable_V", 0), 4),
+                    "Potencia Pc (W)": round(res.get("potencia_disipada_cable_W", 0), 4),
+                })
+            st.dataframe(filas_tabla, use_container_width=True)
+        else:
+            st.warning("No se encontraron registros que coincidan con los filtros seleccionados.")
 
 #Logs tecnicos (...)
 #Don´t know bout this one
@@ -157,8 +291,49 @@ else:
     st.title("📊 Exportación de Reportes en Formato CSV")
     st.subheader("Genere y descargue reportes del historial de cálculos con encabezados estructurados "
         "y unidades físicas explícitas en cada columna")
-<<<<<<< HEAD
 
-"""chao"""
-=======
->>>>>>> c48ace6966384c06464db11473a4e2ea60f06742
+    
+    historial = cargar_historial()
+
+    if not historial:
+        st.warning("No hay registros en el historial para generar reportes.")
+    else:
+        st.subheader("Configuración de Exportación")
+
+        materiales_opc = ["Todos"] + obtener_lista_materiales()
+        filtro_rep_mat = st.selectbox("Exportar por Material:", materiales_opc, key="rep_mat")
+
+        generador_reporte = generar_registros_historial(
+            registros = historial,
+            filtro_material = filtro_rep_mat if filtro_rep_mat != "Todos" else None,
+        )
+        registros_a_exportar = list(generador_reporte)
+
+        st.caption(f"Registros listos para exportar: **{len(registros_a_exportar)}**")
+
+        if registros_a_exportar:
+            csv_data = generar_csv_en_memoria(registros_a_exportar)
+
+            col_d1, col_d2 = st.columns(2)
+            with col_d1:
+                st.download_button(
+                    label = "📥 Descargar Reporte CSV",
+                    data = csv_data,
+                    file_name = f"reporte_circuito_dc_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime = "text/csv",
+                    type = "primary",
+                    use_container_width = True,
+                )
+
+            with col_d2:
+                if st.button("💾 Guardar Copia en Carpeta 'reportes/'", use_container_width=True):
+                    ruta_guardada = exportar_reporte_a_disco(registros_a_exportar)
+                    if ruta_guardada:
+                        st.success(f"Reporte archivado en: `{ruta_guardada}`")
+                    else:
+                        st.error("No se pudo guardar el archivo en disco.")
+
+            with st.expander("👁️ Vista Previa del Archivo CSV (Primeros 5 registros)"):
+                st.code("\n".join(csv_data.splitlines()[:6]), language="text")
+        else:
+            st.info("No hay registros que coincidan con el filtro seleccionado.")
